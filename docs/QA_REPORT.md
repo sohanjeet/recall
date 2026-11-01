@@ -33,7 +33,7 @@ Every route in [App.tsx](../apps/web/src/App.tsx) was visited (10 distinct scree
 
 ## Results
 
-**Mocked suite (`pnpm e2e`): 59 passed, 0 failed, 0 skipped.** Live suite (`pnpm e2e:live`): **5 passed**. Screenshot capture (`pnpm e2e:screenshots`): 26 capture tests, all passed.
+**Mocked suite (`pnpm e2e`): 60 passed, 0 failed, 0 skipped** (59 originally; the mobile-navigation test now runs at both 375 px and 390 px). Live suite (`pnpm e2e:live`): **5 passed**. Screenshot capture (`pnpm e2e:screenshots`): 26 capture tests, all passed.
 
 | Scenario group | Tests | Result |
 | --- | --- | --- |
@@ -90,18 +90,18 @@ None on any route at any of the 5 viewports in the mocked suite (all routes, ass
 
 ## Bugs and observations
 
-No functional bug was found, so no application code was changed. Two low-severity UX findings, from code inspection plus the screenshots:
+Two low-severity UX findings were reported and are **fixed** (Phase 6G):
 
 | # | Severity | Finding | Reproduce |
 | --- | --- | --- | --- |
-| 1 | Low | Meeting status label "Drafts ready" is shown for every analyzed meeting, including ones whose decisions and tasks are all approved, so it can read as "still needs review". | Open the dashboard with an analyzed meeting whose drafts are all approved (fixture "Atlas kickoff"): the tag still says "Drafts ready". Source: `STATUS_LABEL.extracted` in [MeetingsPage.tsx](../apps/web/src/pages/MeetingsPage.tsx). |
-| 2 | Low | At 375–390 px the primary navigation scrolls sideways and "Reminders & digests" is cut off at the edge with no scroll affordance (a fade or arrow), so the last items are easy to miss. | Open `/` at 375×812. See `qa/small-mobile-dashboard.png`. |
+| 1 | Low | Meeting status label "Drafts ready" is shown for every analyzed meeting, including ones whose decisions and tasks are all approved, so it can read as "still needs review". | Open the dashboard with an analyzed meeting whose drafts are all approved (fixture "Atlas kickoff"): the tag still says "Drafts ready". Source: `STATUS_LABEL.extracted` in [MeetingsPage.tsx](../apps/web/src/pages/MeetingsPage.tsx). **Fixed:** the tag is now derived from real state by `meetingReviewState` in [packages/shared](../packages/shared/src/index.ts): "Not analyzed", "Analyzing…", "Analysis failed", "N open conflict(s)", "Conflict check failed", "N awaiting approval", "Nothing extracted" or "Reviewed". The list API now returns pending and open-conflict counts. Unit-tested; dashboard asserted in `qa.spec.ts`. |
+| 2 | Low | At 375–390 px the primary navigation scrolls sideways and "Reminders & digests" is cut off at the edge with no scroll affordance (a fade or arrow), so the last items are easy to miss. | Open `/` at 375×812. See `qa/small-mobile-dashboard.png`. **Fixed:** the nav wraps onto two rows below the `md` breakpoint instead of scrolling, so all five destinations are visible at once; asserted at 375 and 390 px. |
 
 Cosmetic: on mobile the meeting rows are indented slightly more than the page heading.
 
 ## Remaining untested
 
-- An authenticated walkthrough against the real backend and database (needs a dedicated allow-listed test account).
+- An authenticated walkthrough against the real backend and database. The suite is now written and gated ([docs/REAL_E2E.md](REAL_E2E.md), `pnpm e2e:real`) but **has not been run**: it needs an isolated test Supabase project and a dedicated test account.
 - Real Groq extraction and conflict detection through the UI, real Linear issue creation, real session refresh and token expiry with Supabase.
 - The actual Project Atlas history (deliberately not touched).
 - Firefox and WebKit, dark mode, and print.
@@ -113,6 +113,7 @@ Cosmetic: on mobile the meeting rows are indented slightly more than the page he
 ```bash
 pnpm e2e              # mocked QA suite; starts the Vite dev server itself
 pnpm e2e:live         # read-only checks; needs `pnpm dev` running
+pnpm e2e:real         # opt-in, writes data; skipped unless RECALL_REAL_E2E=1 (docs/REAL_E2E.md)
 pnpm e2e:screenshots  # regenerates docs/screenshots; login.png needs `pnpm dev` running
 ```
 

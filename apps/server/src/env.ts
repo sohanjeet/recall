@@ -3,8 +3,15 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
 // Secrets live in the repo-root .env and are only ever read by the server.
-const rootEnvFile = fileURLToPath(new URL("../../../.env", import.meta.url));
+// RECALL_ENV_FILE (used by the opt-in real E2E suite) replaces it entirely, so a test run can never fall back to the
+// real workspace's database or Linear keys. A missing override file is an error, never a silent fallback.
+const overrideEnvFile = process.env.RECALL_ENV_FILE?.trim();
+const rootEnvFile = overrideEnvFile || fileURLToPath(new URL("../../../.env", import.meta.url));
 if (existsSync(rootEnvFile)) process.loadEnvFile(rootEnvFile);
+else if (overrideEnvFile) {
+  console.error(`RECALL_ENV_FILE points to a file that does not exist: ${overrideEnvFile}`);
+  process.exit(1);
+}
 
 const optional = z
   .string()

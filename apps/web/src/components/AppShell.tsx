@@ -37,7 +37,7 @@ export function AppShell() {
             decisions become work.
           </p>
         </div>
-        <nav aria-label="Primary" className="-mx-2 flex gap-0.5 [scrollbar-width:none] overflow-x-auto pb-1.5 md:mx-0 md:flex-col md:overflow-visible md:pb-0">
+        <nav aria-label="Primary" className="-mx-2 flex flex-wrap gap-x-0.5 gap-y-0.5 pb-1.5 md:mx-0 md:flex-col md:flex-nowrap md:pb-0">
           {NAV.map((item) => (
             <NavLink
               key={item.to}

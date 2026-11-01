@@ -89,6 +89,8 @@ test.describe("B. Meetings dashboard", () => {
     const rows = page.locator("ul.divide-y > li");
     await expect(rows).toHaveCount(5);
     await expect(rows.filter({ hasText: "Atlas planning sync" })).toContainText("3 decisions · 3 tasks");
+    await expect(rows.filter({ hasText: "Drafts ready" })).toHaveCount(0);
+    await expect(rows.filter({ hasText: "Atlas kickoff" })).toContainText("Reviewed");
     await expect(rows.filter({ hasText: "Atlas retro" })).toContainText("Analysis failed");
     await expect(rows.filter({ hasText: "Atlas standup" })).toContainText("Not analyzed");
     await page.getByRole("link", { name: /Atlas kickoff/ }).click();
@@ -540,13 +542,21 @@ test.describe("Responsive layout", () => {
     });
   }
 
-  test("mobile primary navigation reaches every page", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
+  for (const width of [375, 390]) test(`mobile primary navigation reaches every page at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 });
     await open(page, "/");
     const nav = page.getByRole("navigation", { name: "Primary" });
+    // Every destination is visible at once: no sideways scrolling to discover any of them.
+    const box = (await nav.boundingBox())!;
+    expect(await nav.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    for (const name of ["Meetings", "New meeting", "Approvals", "Reminders & digests", "People"]) {
+      const b = (await nav.getByRole("link", { name }).boundingBox())!;
+      expect(b.x, name).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width, name).toBeLessThanOrEqual(width);
+      expect(b.y, name).toBeGreaterThanOrEqual(box.y);
+    }
     for (const name of ["New meeting", "Approvals", "Reminders & digests", "People", "Meetings"]) {
       const link = nav.getByRole("link", { name });
-      await link.scrollIntoViewIfNeeded();
       await link.click();
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     }

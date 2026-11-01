@@ -251,7 +251,41 @@ export interface MeetingSummary {
   participants: string[];
   decisionCount: number;
   taskCount: number;
+  /** Decisions still in `proposed`. */
+  pendingDecisionCount: number;
+  /** Tasks still in `proposed`. */
+  pendingTaskCount: number;
+  /** Conflicts raised by this meeting's decisions that nobody has resolved yet. */
+  openConflictCount: number;
+  /** null until the conflict check has run for this meeting. */
+  conflictCheckStatus: ConflictCheckStatus | null;
   createdAt: IsoDateTime;
+}
+
+export type MeetingReviewTone = "neutral" | "caution" | "draft" | "conflict" | "done";
+
+export interface MeetingReviewState {
+  label: string;
+  tone: MeetingReviewTone;
+}
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+/**
+ * What a person should know about a meeting at a glance, derived from its real state rather than from the
+ * analysis status alone. Precedence: failure/progress, open conflicts, failed conflict check, pending approvals,
+ * nothing extracted, then reviewed.
+ */
+export function meetingReviewState(m: MeetingSummary): MeetingReviewState {
+  if (m.status === "ingested") return { label: "Not analyzed", tone: "neutral" };
+  if (m.status === "extracting") return { label: "Analyzing…", tone: "caution" };
+  if (m.status === "failed") return { label: "Analysis failed", tone: "conflict" };
+  if (m.openConflictCount > 0) return { label: plural(m.openConflictCount, "open conflict"), tone: "conflict" };
+  if (m.conflictCheckStatus === "failed") return { label: "Conflict check failed", tone: "caution" };
+  const pending = m.pendingDecisionCount + m.pendingTaskCount;
+  if (pending > 0) return { label: `${pending} awaiting approval`, tone: "draft" };
+  if (m.decisionCount + m.taskCount === 0) return { label: "Nothing extracted", tone: "neutral" };
+  return { label: "Reviewed", tone: "done" };
 }
 
 export interface MeetingDetail extends Meeting {

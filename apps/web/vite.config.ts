@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": "http://localhost:8787",
+      "/api": process.env.RECALL_API_PROXY_TARGET || "http://localhost:8787",
     },
   },
 });

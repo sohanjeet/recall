@@ -21,3 +21,4 @@ pnpm-debug.log*
 .idea/
 .vscode/
 Thumbs.db
+!.env.e2e.example

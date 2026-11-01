@@ -327,7 +327,7 @@ Web (`apps/web`): optional `VITE_API_BASE_URL`, needed only when the API is on a
 
 `pnpm test` runs the server suite: unit tests (Groq client, conflict ranking, date resolution, auth and rate limiting) and integration tests against PostgreSQL. The database tests use `DATABASE_URL` from `.env` and are **skipped when the database is unreachable**; with a database configured they run for real. Groq and Linear are replaced with fakes, so tests never call those services. The database tests create and roll back or tag their own rows; point `DATABASE_URL` at a development database, not one holding data you care about. Last run: 108 of 108 tests pass, with typecheck and build clean.
 
-Browser tests live in [e2e/](e2e/): `pnpm e2e` runs the Playwright suite against the web app with a mocked API (no database, Groq, Linear or Supabase writes), and `pnpm e2e:live` runs read-only checks against a running server. See [docs/QA_REPORT.md](docs/QA_REPORT.md) for what is real versus mocked.
+Browser tests live in [e2e/](e2e/): `pnpm e2e` runs the Playwright suite against the web app with a mocked API (no database, Groq, Linear or Supabase writes), `pnpm e2e:live` runs read-only checks against a running server, and `pnpm e2e:real` is an opt-in suite against an isolated test project with a dedicated test account (skipped unless enabled; see [docs/REAL_E2E.md](docs/REAL_E2E.md)). See [docs/QA_REPORT.md](docs/QA_REPORT.md) for what is real versus mocked.
 
 ## Deployment (Vercel + Render + Supabase)
 

@@ -123,7 +123,11 @@ export async function listMeetings(db: Queryable): Promise<MeetingSummary[]> {
   const { rows } = await db.query(
     `select m.id, m.title, m.occurred_at, m.source, m.status, m.participants, m.created_at,
             (select count(*)::int from decisions d where d.meeting_id = m.id) as decision_count,
-            (select count(*)::int from tasks t where t.meeting_id = m.id) as task_count
+            (select count(*)::int from tasks t where t.meeting_id = m.id) as task_count,
+            (select count(*)::int from decisions d where d.meeting_id = m.id and d.status = 'proposed') as pending_decision_count,
+            (select count(*)::int from tasks t where t.meeting_id = m.id and t.status = 'proposed') as pending_task_count,
+            (select count(*)::int from decision_conflicts c where c.meeting_id = m.id and c.resolution = 'open') as open_conflict_count,
+            m.conflict_check_status
      from meetings m order by m.occurred_at desc, m.created_at desc`,
   );
   return rows.map((r) => ({
@@ -135,6 +139,10 @@ export async function listMeetings(db: Queryable): Promise<MeetingSummary[]> {
     participants: r.participants,
     decisionCount: r.decision_count,
     taskCount: r.task_count,
+    pendingDecisionCount: r.pending_decision_count,
+    pendingTaskCount: r.pending_task_count,
+    openConflictCount: r.open_conflict_count,
+    conflictCheckStatus: r.conflict_check_status,
     createdAt: r.created_at.toISOString(),
   }));
 }

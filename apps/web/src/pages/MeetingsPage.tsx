@@ -1,3 +1,4 @@
+import { meetingReviewState, type MeetingReviewTone } from "@recall/shared";
 import { Link } from "react-router";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorNotice } from "../components/ErrorNotice";
@@ -5,21 +6,15 @@ import { PageHeader } from "../components/PageHeader";
 import { api } from "../lib/api";
 import { useAsync } from "../lib/useAsync";
 
-export const STATUS_LABEL = {
-  ingested: "Not analyzed",
-  extracting: "Analyzing…",
-  extracted: "Drafts ready",
-  failed: "Analysis failed",
-} as const;
+const TONE_TAG: Record<MeetingReviewTone, string> = {
+  neutral: "tag",
+  caution: "tag-caution",
+  draft: "tag-draft",
+  conflict: "tag-conflict",
+  done: "tag-ok",
+};
 
-const STATUS_TAG = {
-  ingested: "tag",
-  extracting: "tag-caution",
-  extracted: "tag-draft",
-  failed: "tag-conflict",
-} as const;
-
-export const statusTag = (s: keyof typeof STATUS_LABEL) => STATUS_TAG[s];
+export const toneTag = (tone: MeetingReviewTone) => TONE_TAG[tone];
 
 export function MeetingsPage() {
   const { state, reload } = useAsync(api.listMeetings, []);
@@ -52,7 +47,9 @@ export function MeetingsPage() {
       )}
       {state.kind === "ready" && state.data.length > 0 && (
         <ul className="rise-2 border-line divide-line divide-y border-y">
-          {state.data.map((m) => (
+          {state.data.map((m) => {
+            const review = meetingReviewState(m);
+            return (
             <li key={m.id}>
               <Link to={`/meetings/${m.id}`} className="row-link group">
                 <span className="min-w-0">
@@ -66,11 +63,12 @@ export function MeetingsPage() {
                   <span className="meta tabular-nums">
                     {m.decisionCount} decision{m.decisionCount === 1 ? "" : "s"} · {m.taskCount} task{m.taskCount === 1 ? "" : "s"}
                   </span>
-                  <span className={STATUS_TAG[m.status]}>{STATUS_LABEL[m.status]}</span>
+                  <span className={toneTag(review.tone)}>{review.label}</span>
                 </span>
               </Link>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </>

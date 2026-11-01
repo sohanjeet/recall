@@ -1,4 +1,4 @@
-import type { Evidence, MeetingDetail } from "@recall/shared";
+import { meetingReviewState, type Evidence, type MeetingDetail } from "@recall/shared";
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import { ConflictCard } from "../components/ConflictCard";
@@ -7,7 +7,6 @@ import { PageHeader } from "../components/PageHeader";
 import { api } from "../lib/api";
 import { formatDay } from "../lib/dates";
 import { useAsync } from "../lib/useAsync";
-import { STATUS_LABEL } from "./MeetingsPage";
 
 function Section({ title, count, children }: { title: string; count?: number; children: ReactNode }) {
   return (
@@ -94,6 +93,15 @@ export function MeetingDetailPage() {
 
   const m: MeetingDetail = state.data;
   const analyzed = m.status === "extracted";
+  const review = meetingReviewState({
+    ...m,
+    decisionCount: m.decisions.length,
+    taskCount: m.tasks.length,
+    pendingDecisionCount: m.decisions.filter((d) => d.status === "proposed").length,
+    pendingTaskCount: m.tasks.filter((t) => t.status === "proposed").length,
+    openConflictCount: m.conflicts.filter((c) => c.resolution === "open").length,
+    conflictCheckStatus: m.conflictCheck.status,
+  });
   const hasDrafts = m.decisions.some((d) => d.status === "proposed") || m.tasks.some((t) => t.status === "proposed");
   // Only unresolved conflicts warn; resolved ones stay visible in the conflicts section as history.
   const openConflictCount = (decisionId: string) =>
@@ -112,7 +120,7 @@ export function MeetingDetailPage() {
         title={m.title}
         description={`${new Date(m.occurredAt).toLocaleDateString(undefined, { timeZone: "UTC", dateStyle: "long" })}${
           m.participants.length ? ` · ${m.participants.join(", ")}` : ""
-        } · ${STATUS_LABEL[m.status]}`}
+        } · ${review.label}`}
         actions={
           m.status !== "extracting" && (m.status !== "extracted" || hasDrafts) ? (
             <button

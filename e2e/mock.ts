@@ -179,7 +179,16 @@ export class MockApi {
   }
 
   summaries(): MeetingSummary[] {
-    return this.meetings.map(({ id, title, occurredAt, source, status, participants, decisions, tasks, createdAt }) => ({ id, title, occurredAt, source, status, participants, decisionCount: decisions.length, taskCount: tasks.length, createdAt }));
+    return this.meetings.map(({ id, title, occurredAt, source, status, participants, decisions, tasks, conflicts, conflictCheck, createdAt }) => ({
+      id, title, occurredAt, source, status, participants,
+      decisionCount: decisions.length,
+      taskCount: tasks.length,
+      pendingDecisionCount: decisions.filter((d) => d.status === "proposed").length,
+      pendingTaskCount: tasks.filter((t) => t.status === "proposed").length,
+      openConflictCount: conflicts.filter((c) => c.resolution === "open").length,
+      conflictCheckStatus: conflictCheck.status,
+      createdAt,
+    }));
   }
 
   approvals(): ApprovalsResponse {
