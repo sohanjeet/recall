@@ -21,15 +21,46 @@ Paste a speaker-labelled transcript (or a dictated recap), and Recall:
 
 ## Screenshots
 
-> Placeholders. Capture these from a running instance and save them under `docs/screenshots/` (the folder does not exist yet).
+Real browser captures of the app, taken with Playwright ([QA report](docs/QA_REPORT.md)). **Only the login page is served by the live server.** Every other image uses the mocked API in [e2e/mock.ts](e2e/mock.ts) with fixture "Project Atlas" data, so it shows how the UI behaves, not a verified live Groq, Supabase or Linear run. The Linear link shown is a fixture; no Linear issue was created.
 
-| Screen | File |
+**Meetings dashboard** (fixture data)
+
+![Meetings dashboard](docs/screenshots/portfolio/dashboard.png)
+
+**AI extraction: decisions, tasks, owners, deadlines and transcript evidence** (fixture data)
+
+![AI extraction](docs/screenshots/portfolio/ai-extraction.png)
+
+**Conflict detection: old vs. new decision, with a clear and an uncertain conflict** (fixture data)
+
+![Conflict detected](docs/screenshots/portfolio/conflict-detected.png)
+
+**After resolution: the earlier decision is superseded and the warning is gone** (fixture data)
+
+![Conflict resolved](docs/screenshots/portfolio/conflict-resolved.png)
+
+**Approvals queue** (fixture data)
+
+![Approvals](docs/screenshots/portfolio/approvals.png)
+
+**Linear sync states: synced, and failed with retry** (fixture data, no live Linear call)
+
+![Linear sync](docs/screenshots/portfolio/linear-sync.png)
+
+<details>
+<summary>More screens</summary>
+
+| | |
 | --- | --- |
-| Meetings list | `docs/screenshots/meetings.png` _(to add)_ |
-| Extracted decisions and tasks with evidence quotes | `docs/screenshots/meeting-detail.png` _(to add)_ |
-| Conflict review (old vs. new decision) | `docs/screenshots/conflict-review.png` _(to add)_ |
-| Approvals queue | `docs/screenshots/approvals.png` _(to add)_ |
-| Reminders and weekly digests | `docs/screenshots/reminders.png` _(to add)_ |
+| ![Sign in](docs/screenshots/portfolio/login.png) Sign in (live server) | ![New meeting](docs/screenshots/portfolio/new-meeting.png) New meeting |
+| ![Decisions](docs/screenshots/portfolio/decisions.png) Approved decisions | ![Tasks](docs/screenshots/portfolio/tasks.png) Proposed tasks |
+| ![Reminders](docs/screenshots/portfolio/reminders.png) Reminders (in-app only) | ![Weekly digest](docs/screenshots/portfolio/weekly-digest.png) Weekly digest by owner |
+
+Mobile, tablet, validation, empty, loading and failure states are in [docs/screenshots/qa/](docs/screenshots/qa/).
+
+</details>
+
+Regenerate with `pnpm e2e:screenshots`; run the browser suite with `pnpm e2e`. Full results, bugs and untested areas: [docs/QA_REPORT.md](docs/QA_REPORT.md).
 
 ## What makes it different
 
@@ -295,6 +326,8 @@ Web (`apps/web`): optional `VITE_API_BASE_URL`, needed only when the API is on a
 ### Tests
 
 `pnpm test` runs the server suite: unit tests (Groq client, conflict ranking, date resolution, auth and rate limiting) and integration tests against PostgreSQL. The database tests use `DATABASE_URL` from `.env` and are **skipped when the database is unreachable**; with a database configured they run for real. Groq and Linear are replaced with fakes, so tests never call those services. The database tests create and roll back or tag their own rows; point `DATABASE_URL` at a development database, not one holding data you care about. Last run: 108 of 108 tests pass, with typecheck and build clean.
+
+Browser tests live in [e2e/](e2e/): `pnpm e2e` runs the Playwright suite against the web app with a mocked API (no database, Groq, Linear or Supabase writes), and `pnpm e2e:live` runs read-only checks against a running server. See [docs/QA_REPORT.md](docs/QA_REPORT.md) for what is real versus mocked.
 
 ## Deployment (Vercel + Render + Supabase)
 
