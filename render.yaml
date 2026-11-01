@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: recall-api
+    runtime: node
+    plan: starter
+    region: oregon
+    # Dev dependencies are needed at build time (typescript).
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm --filter @recall/shared build && pnpm --filter @recall/server build
+    startCommand: node apps/server/dist/index.js
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATABASE_SSL
+        value: "true"
+      # Secrets and deployment-specific values: set in the Render dashboard, never in this file.
+      - { key: APP_URL, sync: false }
+      - { key: DATABASE_URL, sync: false }
+      - { key: GROQ_API_KEY, sync: false }
+      - { key: SUPABASE_URL, sync: false }
+      - { key: SUPABASE_ANON_KEY, sync: false }
+      - { key: SUPABASE_JWT_SECRET, sync: false }
+      - { key: AUTH_ALLOWED_EMAILS, sync: false }
+      - { key: CORS_ORIGINS, sync: false }
+      - { key: LINEAR_API_KEY, sync: false }
+      - { key: LINEAR_TEAM_ID, sync: false }
+      - { key: RESEND_API_KEY, sync: false }
+      - { key: EMAIL_FROM, sync: false }

@@ -1,0 +1,20 @@
+{
+  "name": "recall",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @recall/shared build && pnpm --parallel --filter @recall/shared --filter @recall/server --filter @recall/web dev",
+    "build": "pnpm --filter @recall/shared build && pnpm --filter @recall/server --filter @recall/web build",
+    "typecheck": "pnpm --filter @recall/shared build && pnpm -r typecheck",
+    "test": "pnpm --filter @recall/server test",
+    "start": "pnpm --filter @recall/server start",
+    "db:migrate": "pnpm --filter @recall/server db:migrate"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

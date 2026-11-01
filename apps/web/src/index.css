@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+
+  /* Warm paper neutrals; ink tinted toward the same hue. */
+  --color-ink: oklch(0.2 0.015 70);
+  --color-muted: oklch(0.47 0.014 70);
+  --color-faint: oklch(0.6 0.012 70);
+  --color-line: oklch(0.9 0.01 80);
+  --color-line-strong: oklch(0.82 0.012 80);
+  --color-surface: oklch(0.972 0.008 85);
+  --color-paper: oklch(0.992 0.004 85);
+
+  /* One accent: deep pine. */
+  --color-accent: oklch(0.4 0.085 165);
+  --color-accent-hover: oklch(0.33 0.08 165);
+  --color-accent-soft: oklch(0.945 0.025 165);
+
+  /* Semantic signals, reserved for conflicts, warnings and status. */
+  --color-conflict: oklch(0.5 0.17 32);
+  --color-conflict-soft: oklch(0.96 0.025 40);
+  --color-conflict-line: oklch(0.83 0.08 38);
+  --color-caution: oklch(0.48 0.1 75);
+  --color-caution-soft: oklch(0.965 0.035 90);
+  --color-caution-line: oklch(0.85 0.07 85);
+  --color-ok: oklch(0.43 0.1 155);
+  --color-ok-soft: oklch(0.95 0.03 155);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+body {
+  @apply bg-surface text-ink antialiased;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+input,
+select,
+textarea {
+  caret-color: var(--color-accent);
+}
+
+/* Transcript-derived text (URLs, identifiers) must wrap rather than force horizontal scroll. */
+main {
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  /* ---- Type ---- */
+  .display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .page-title {
+    @apply text-[2rem] md:text-[2.75rem];
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .section-title {
+    @apply text-ink flex items-baseline gap-2.5 text-[1.375rem];
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+  .count {
+    @apply text-faint text-sm tabular-nums;
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+  }
+  .meta {
+    @apply text-muted text-[0.8125rem];
+  }
+  .link {
+    @apply text-accent decoration-accent/30 underline underline-offset-[3px] transition-colors hover:decoration-accent;
+  }
+
+  /* ---- Buttons ---- */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-quiet {
+    @apply inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium whitespace-nowrap select-none;
+    transition:
+      background-color 160ms var(--ease-out-expo),
+      border-color 160ms var(--ease-out-expo),
+      transform 160ms var(--ease-out-expo);
+  }
+  :is(.btn, .btn-primary, .btn-secondary, .btn-quiet):active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  :is(.btn, .btn-primary, .btn-secondary, .btn-quiet):disabled {
+    @apply cursor-not-allowed opacity-45;
+  }
+  .btn-primary {
+    @apply bg-accent text-paper hover:bg-accent-hover;
+  }
+  .btn-secondary {
+    @apply border-line-strong bg-paper text-ink hover:border-ink border;
+  }
+  .btn-quiet {
+    @apply text-muted hover:text-ink hover:bg-ink/5;
+  }
+
+  /* ---- Fields ---- */
+  .field {
+    @apply border-line-strong bg-paper text-ink placeholder:text-faint w-full rounded-md border px-3 py-2 text-sm;
+    transition:
+      border-color 160ms var(--ease-out-expo),
+      box-shadow 160ms var(--ease-out-expo);
+  }
+  .field:hover:not(:disabled) {
+    border-color: var(--color-faint);
+  }
+  .field:focus {
+    @apply border-accent outline-none;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 18%, transparent);
+  }
+  .field:disabled {
+    @apply bg-surface text-muted;
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-conflict);
+  }
+  .label {
+    @apply text-ink block text-[0.8125rem] font-medium;
+  }
+  .hint {
+    @apply text-muted mt-1.5 block text-xs;
+  }
+
+  /* ---- Tags: status is always text plus shape, never colour alone ---- */
+  .tag,
+  .tag-draft,
+  .tag-ok,
+  .tag-conflict,
+  .tag-caution {
+    @apply border-line-strong text-muted inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-transparent px-2 py-0.5 text-xs font-medium;
+  }
+  .tag-draft {
+    @apply border-accent/30 bg-accent-soft text-accent;
+  }
+  .tag-ok {
+    @apply border-ok/25 bg-ok-soft text-ok;
+  }
+  .tag-conflict {
+    @apply border-conflict-line bg-conflict-soft text-conflict;
+  }
+  .tag-caution {
+    @apply border-caution-line bg-caution-soft text-caution;
+  }
+
+  /* ---- Surfaces ---- */
+  .panel {
+    @apply border-line bg-paper rounded-lg border;
+  }
+  .item {
+    @apply border-line bg-paper rounded-lg border p-5;
+    transition: border-color 200ms var(--ease-out-expo);
+  }
+  .item:hover {
+    border-color: var(--color-line-strong);
+  }
+  .item-conflict {
+    border-color: var(--color-conflict-line);
+  }
+  .quote {
+    @apply text-muted mt-3 pl-3 text-[0.8125rem] italic;
+    border-left: 1px solid var(--color-line-strong);
+  }
+  .notice-caution {
+    @apply border-caution-line bg-caution-soft text-ink rounded-lg border px-4 py-3 text-sm;
+  }
+  .notice-error {
+    @apply border-conflict-line bg-conflict-soft text-conflict rounded-lg border px-4 py-3 text-sm;
+  }
+
+  /* ---- Conflict comparison: the signature element ---- */
+  .compare {
+    @apply grid overflow-hidden rounded-lg border md:grid-cols-2;
+    border-color: var(--color-conflict-line);
+  }
+  .compare-side {
+    @apply p-5;
+  }
+  .compare-old {
+    background: var(--color-surface);
+  }
+  .compare-new {
+    background: var(--color-paper);
+  }
+  .compare-side + .compare-side {
+    border-top: 1px solid var(--color-conflict-line);
+  }
+  @media (min-width: 48rem) {
+    .compare-side + .compare-side {
+      border-top: 0;
+      border-left: 1px solid var(--color-conflict-line);
+    }
+  }
+  .compare-label {
+    @apply text-muted text-xs font-medium tracking-wide uppercase;
+  }
+  .compare-old .compare-text {
+    @apply text-muted;
+  }
+  .compare-struck .compare-text {
+    @apply text-muted;
+    text-decoration: line-through;
+    text-decoration-color: var(--color-conflict-line);
+    text-decoration-thickness: 1px;
+  }
+  /* Resolved conflicts are history, not warnings: neutral borders. */
+  .compare-resolved,
+  .compare-resolved .compare-side + .compare-side {
+    border-color: var(--color-line);
+  }
+  .compare-resolved .compare-struck .compare-text {
+    text-decoration-color: var(--color-line-strong);
+  }
+
+  /* ---- Lists / tables ---- */
+  .row-link {
+    @apply hover:bg-surface flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4;
+    transition: background-color 160ms var(--ease-out-expo);
+  }
+}
+
+/* One restrained entrance for page content; skipped for reduced motion. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 420ms var(--ease-out-expo) both;
+  }
+  .rise-2 {
+    animation: rise 420ms var(--ease-out-expo) 60ms both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

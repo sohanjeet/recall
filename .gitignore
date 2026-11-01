@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# Local tooling, deploy CLIs and artifacts
+.vercel/
+.render/
+.claude/
+coverage/
+*.dump
+*.sql.gz
+*.bak
+*.tmp
+npm-debug.log*
+pnpm-debug.log*
+.idea/
+.vscode/
+Thumbs.db
